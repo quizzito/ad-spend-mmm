@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data — never commit generated CSVs
+data/raw/
+
+# Secrets
+.env
+
+# dbt — local profile is never committed
+dbt/profiles.yml
+dbt/target/
+dbt/logs/
+dbt/.user.yml
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
