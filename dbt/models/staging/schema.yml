@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: google_ads_raw
+        description: "Google Ads API extract — campaign-day grain"
+      - name: meta_ads_raw
+        description: "Meta Ads API extract — adset-day grain"
+      - name: tiktok_ads_raw
+        description: "TikTok Ads API extract — adgroup-day grain"
+      - name: reddit_ads_raw
+        description: "Reddit Ads API extract — ad_group-day grain"
+
+models:
+  - name: stg_google
+    description: "Standardized Google Ads — unified column names"
+  - name: stg_meta
+    description: "Standardized Meta Ads — unified column names"
+  - name: stg_tiktok
+    description: "Standardized TikTok Ads — unified column names"
+  - name: stg_reddit
+    description: "Standardized Reddit Ads — unified column names"
+  - name: consolidated_spend
+    description: "UNION ALL of all 4 platforms — MMM-ready"

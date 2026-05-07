@@ -1,0 +1,103 @@
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: mmm_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  airflow-init:
+    image: apache/airflow:2.9.1
+    container_name: mmm_airflow_init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - "airflow db migrate && airflow users create -u admin -p admin -f Admin -l User -r Admin -e admin@example.com"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:mmm2024@postgres/airflow_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      _PIP_ADDITIONAL_REQUIREMENTS: "faker==25.2.0 pandas==2.2.2 numpy==1.26.4 python-dotenv==1.0.1 psycopg2-binary==2.9.9 dbt-core==1.8.3 dbt-postgres==1.8.2"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./extractors:/opt/airflow/extractors
+      - ./data:/opt/airflow/data
+      - ./dbt:/opt/airflow/dbt
+      - airflow_logs:/opt/airflow/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  airflow-webserver:
+    image: apache/airflow:2.9.1
+    container_name: mmm_airflow_webserver
+    command: webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:mmm2024@postgres/airflow_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      _PIP_ADDITIONAL_REQUIREMENTS: "faker==25.2.0 pandas==2.2.2 numpy==1.26.4 python-dotenv==1.0.1 psycopg2-binary==2.9.9 dbt-core==1.8.3 dbt-postgres==1.8.2"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./extractors:/opt/airflow/extractors
+      - ./data:/opt/airflow/data
+      - ./dbt:/opt/airflow/dbt
+      - airflow_logs:/opt/airflow/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.1
+    container_name: mmm_airflow_scheduler
+    command: scheduler
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:mmm2024@postgres/airflow_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      _PIP_ADDITIONAL_REQUIREMENTS: "faker==25.2.0 pandas==2.2.2 numpy==1.26.4 python-dotenv==1.0.1 psycopg2-binary==2.9.9 dbt-core==1.8.3 dbt-postgres==1.8.2"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./extractors:/opt/airflow/extractors
+      - ./data:/opt/airflow/data
+      - ./dbt:/opt/airflow/dbt
+      - airflow_logs:/opt/airflow/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  postgres_data:
+  airflow_logs:

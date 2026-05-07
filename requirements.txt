@@ -1,0 +1,22 @@
+# Data generation
+numpy==1.26.4
+pandas==2.2.2
+faker==25.2.0
+
+# Postgres connection
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.30
+
+# dbt
+dbt-core==1.8.3
+dbt-postgres==1.8.2
+
+# Utilities
+python-dotenv==1.0.1
+joblib==1.4.2
+tqdm==4.66.4
+
+# Jupyter
+jupyter==1.0.0
+ipykernel==6.29.4
+
